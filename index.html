@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>proyecto inferencia gratuita</title>
+  <title>proyecto inferencia</title>
   <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -87,7 +87,7 @@
 
     <main class="messages-wrap" id="messagesWrap" role="log" aria-live="polite">
       <div class="empty-state" id="emptyState">
-        <h2>.js</h2>
+        <h2>proyecto inferencia</h2>
         <div class="empty-hints" id="promptTree">
           <span class="prompt-loading">Cargando prompts...</span>
         </div>
@@ -859,9 +859,9 @@
     }
 
     function renderPromptTree(categories) {
-      promptTree.innerHTML = categories[0].items.map(item => `
+      promptTree.innerHTML = categories[0].items.map((item, index) => `
         <button class="hint-chip" type="button" data-prompt="${escapeHtml(item.prompt)}">
-          ${escapeHtml(item.label)}
+          ${index < 10 ? `${index === 9 ? 0 : index + 1}. ` : ''}${escapeHtml(item.label)}
         </button>
       `).join('');
     }
@@ -875,12 +875,17 @@
         .replace(/'/g, '&#39;');
     }
 
-    promptTree.addEventListener('click', e => {
-      const chip = e.target.closest('.hint-chip');
-      if (!chip) return;
+    function writePrompt(chip) {
       chatInput.value = chip.dataset.prompt;
       chatInput.dispatchEvent(new Event('input'));
       chatInput.focus();
+      chatInput.setSelectionRange(chatInput.value.length, chatInput.value.length);
+    }
+
+    promptTree.addEventListener('click', e => {
+      const chip = e.target.closest('.hint-chip');
+      if (!chip) return;
+      writePrompt(chip);
     });
 
     document.getElementById('clearBtn').addEventListener('click', startNewConversation);
@@ -1182,6 +1187,18 @@
         } else if (e.key === 'Escape') {
           e.preventDefault();
           closeDeleteDialog();
+        }
+        return;
+      }
+
+      if (/^[0-9]$/.test(e.key) && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey
+          && messages.length === 0 && !chatInput.value && !drawer.classList.contains('open')
+          && !modelDropdown.classList.contains('open')) {
+        const chipIndex = e.key === '0' ? 9 : Number(e.key) - 1;
+        const chip = promptTree.querySelectorAll('.hint-chip')[chipIndex];
+        if (chip) {
+          e.preventDefault();
+          writePrompt(chip);
         }
         return;
       }

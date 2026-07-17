@@ -25,6 +25,22 @@
       {
         "label": "Inventario de una tienda",
         "prompt": "Enséñame una guía completa de consola JavaScript para analizar el inventario de una tienda. Cada producto tiene id, nombre, categoría, precio, stock, activo y etiquetas. Crea datos de ejemplo cotidianos y luego explica con código: filter para seleccionar productos disponibles, map para generar un resumen con valor de inventario, reduce para calcular valor por categoría, find para recuperar un producto, includes para buscar etiquetas y some/every para validar stock. Quiero cada método primero por separado con console.log y salida esperada, seguido de una cadena filter-map-reduce. Explica qué entra y sale de cada callback, por qué se usa el valor inicial de reduce, qué pasa si no hay resultados y cómo evitar mutar los datos. No uses React, Vite ni APIs."
+      },
+      {
+        "label": "Biblioteca y préstamos",
+        "prompt": "Enséñame paso a paso en consola JavaScript a analizar una biblioteca. Cada libro debe tener id, título, autor, géneros, año, disponible y número de préstamos. Crea datos variados y usa filter para obtener libros disponibles, map para crear fichas legibles, reduce para contar libros por género, find para localizar un título, includes para comprobar géneros, some para detectar libros muy prestados y every para validar los datos. Incluye código ejecutable, console.log y salida esperada para cada operación. Termina con una cadena filter-map-reduce y explica callbacks, acumulador, valores iniciales, arrays vacíos e inmutabilidad. No uses React, Vite ni APIs."
+      },
+      {
+        "label": "Reservas de hotel",
+        "prompt": "Enséñame con JavaScript de consola a analizar reservas de un hotel. Cada reserva incluye id, huésped, tipo de habitación, noches, precio por noche, confirmada, servicios y fecha de entrada. Crea datos realistas y usa filter para reservas confirmadas, map para calcular importes, reduce para obtener ingresos totales y por habitación, find para buscar una reserva, includes para comprobar servicios y some/every para validar fechas y precios. Muestra cada paso con console.log y salida esperada, seguido de una cadena filter-map-reduce. Explica el acumulador, los resultados booleanos, casos borde y cómo no mutar el array original. No uses React, Vite ni APIs."
+      },
+      {
+        "label": "Catálogo de películas",
+        "prompt": "Enséñame una solución completa en consola JavaScript para analizar un catálogo de películas. Cada película tiene id, título, géneros, duración, calificación, disponible y reproducciones. Crea ejemplos variados. Usa filter para seleccionar películas disponibles y bien calificadas, map para generar descripciones, reduce para calcular duración y reproducciones por género, find para buscar un título, includes para consultar géneros, some para detectar películas largas y every para validar calificaciones. Incluye código ejecutable, console.log y salidas esperadas. Después combina filter, map y reduce en una cadena explicada línea por línea. Trata arrays vacíos, valores iniciales e inmutabilidad. No uses React ni Vite."
+      },
+      {
+        "label": "Registro de ventas",
+        "prompt": "Enséñame paso a paso en consola JavaScript cómo analizar un registro de ventas. Cada venta debe incluir id, vendedor, productos, región, total, completada, etiquetas y fecha. Crea datos diversos y usa filter para ventas completadas o por región, map para producir resúmenes, reduce para calcular ingresos por vendedor y región, find para localizar una venta, includes para buscar productos o etiquetas y some/every para validar objetivos y datos. Presenta cada método por separado con console.log y salida esperada, y termina con una cadena filter-map-reduce. Explica el flujo de datos, el acumulador, casos borde y cómo evitar mutaciones. No uses React, Vite ni APIs."
       }
     ]
   }
