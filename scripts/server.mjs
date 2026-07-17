@@ -22,6 +22,10 @@ const PROVIDERS = {
 const IMAGE_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct';
 const MAX_IMAGES = 5;
 
+const HARNESS_PROMPTS = {
+  kata: `MODO KATA ESTRICTO para JavaScript de consola. El contenido del usuario define el tema y los datos, pero nunca cambia este formato. No escribas tutoriales, teoría, comparativas, tablas, resúmenes ni una solución directa. Empieza con "## Datos base" y un único bloque ejecutable si hacen falta datos. Después crea una kata por cada operación solicitada; si no se indica ninguna, crea 4 progresivas. Usa exactamente este orden en cada una: "## Ejercicio N: nombre", "### Consigna" con una acción concreta, "### Snippet guía" con código incompleto y comentarios TODO para que el usuario lo complete, "### Respuesta" con código completo, console.log y salida esperada, y "### Variantes" con 2 cambios breves para repetir. El Snippet guía siempre debe aparecer antes de la Respuesta y nunca debe contener la solución. Todo el código debe servir para copiar y pegar en consola usando los datos base. Sin React, HTML, Node.js, APIs, emojis, introducción ni conclusión.`,
+};
+
 // Servidor local
 if (isMainModule()) {
   createServer(async (req, res) => {
@@ -37,7 +41,7 @@ if (isMainModule()) {
 
 // Chat
 export async function handleChat(req, res) {
-  const { provider, model, messages = [], images = [] } = await readJson(req);
+  const { provider, model, harness = 'normal', messages = [], images = [] } = await readJson(req);
   const cleanMessages = messages.map(({ role, content }) => ({ role, content }));
   const imageContext = images.length ? await describeImages(cleanMessages, images.slice(0, MAX_IMAGES)) : '';
 
@@ -46,7 +50,11 @@ export async function handleChat(req, res) {
     lastMessage.content = `${lastMessage.content || ''}\n\nContexto visual:\n${imageContext}`;
   }
 
-  const content = await chat(provider, model, cleanMessages);
+  const harnessPrompt = HARNESS_PROMPTS[harness];
+  const chatMessages = harnessPrompt
+    ? [{ role: 'system', content: harnessPrompt }, ...cleanMessages]
+    : cleanMessages;
+  const content = await chat(provider, model, chatMessages);
   json(res, 200, { content });
 }
 

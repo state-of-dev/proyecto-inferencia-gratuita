@@ -244,6 +244,16 @@ select {
   animation: dropIn 200ms cubic-bezier(0.4, 0, 0.2, 1) both
 }
 
+.harness-selector-wrap {
+  position: relative;
+  min-width: 0;
+  flex: 0 1 180px
+}
+
+.harness-dropdown {
+  width: max(100%, 260px)
+}
+
 @keyframes dropIn {
   from {
     opacity: 0;
@@ -1522,6 +1532,23 @@ select {
 }
 
 @media (max-width:600px) {
+  .topbar {
+    gap: var(--space-2);
+    padding: var(--space-2)
+  }
+
+  .topbar-left {
+    gap: var(--space-2)
+  }
+
+  .topbar-actions {
+    gap: var(--space-1)
+  }
+
+  .db-status {
+    display: none
+  }
+
   .confirm-overlay {
     align-items: flex-end;
     padding: var(--space-3)
@@ -1578,12 +1605,14 @@ select {
     padding: var(--space-4) var(--space-3)
   }
 
-  .model-selector-wrap {
+  .model-selector-wrap,
+  .harness-selector-wrap {
     flex: 0 0 auto;
     max-width: none
   }
 
-  .model-btn {
+  .model-btn,
+  .harness-selector-wrap .model-btn {
     width: 40px;
     height: 40px;
     justify-content: center;
@@ -1591,11 +1620,14 @@ select {
   }
 
   .model-btn .model-label,
-  .model-btn .chevron {
+  .model-btn .chevron,
+  .harness-selector-wrap .model-label,
+  .harness-selector-wrap .chevron {
     display: none
   }
 
-  .model-dropdown {
+  .model-dropdown,
+  .harness-dropdown {
     position: fixed;
     top: 64px;
     left: var(--space-3);

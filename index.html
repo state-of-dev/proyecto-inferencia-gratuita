@@ -60,6 +60,28 @@
           </div>
         </div>
 
+        <div class="harness-selector-wrap">
+          <button class="model-btn" id="harnessBtn" aria-haspopup="listbox" aria-expanded="false"
+            aria-label="Seleccionar modo" title="Modo del asistente (Ctrl+Alt+K)">
+            <i data-lucide="cpu" width="16" height="16" id="harnessIcon"></i>
+            <span class="model-label" id="harnessLabel">Normal</span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <div class="model-dropdown harness-dropdown" id="harnessDropdown" role="listbox">
+            <div class="dropdown-body">
+              <div class="model-option selected" data-harness="normal" role="option" tabindex="0">
+                <span class="opt-dot" style="background:#94a3b8"></span><span class="opt-name">Normal</span><span class="opt-tag">Sin arnés</span>
+              </div>
+              <div class="model-option" data-harness="kata" role="option" tabindex="0">
+                <span class="opt-dot" style="background:#a5d6a7"></span><span class="opt-name">Kata</span><span class="opt-tag">Practicar</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="topbar-actions">
@@ -201,6 +223,10 @@
     const modelDropdown = document.getElementById('modelDropdown');
     const modelSearch = document.getElementById('modelSearch');
     const dropdownBody = document.getElementById('dropdownBody');
+    const harnessBtn = document.getElementById('harnessBtn');
+    const harnessIcon = document.getElementById('harnessIcon');
+    const harnessLabel = document.getElementById('harnessLabel');
+    const harnessDropdown = document.getElementById('harnessDropdown');
     const promptTree = document.getElementById('promptTree');
     const messagesWrap = document.getElementById('messagesWrap');
     const emptyState = document.getElementById('emptyState');
@@ -227,6 +253,7 @@
     let keyboardConversationAction = null;
     let keyboardModelIndex = -1;
     let isKeyboardModelNavigation = false;
+    let selectedHarness = 'normal';
 
     // Base de datos y persistencia local
     function generateId() {
@@ -715,6 +742,7 @@
     }
 
     function openDropdown() {
+      closeHarnessDropdown();
       modelDropdown.classList.add('open');
       modelBtn.setAttribute('aria-expanded', 'true');
       if (selectedModel.provider === 'openrouter') {
@@ -738,7 +766,10 @@
       isKeyboardModelNavigation = false;
     }
 
-    modelBtn.addEventListener('click', () => modelDropdown.classList.contains('open') ? closeDropdown() : openDropdown());
+    modelBtn.addEventListener('click', () => {
+      closeHarnessDropdown();
+      modelDropdown.classList.contains('open') ? closeDropdown() : openDropdown();
+    });
     document.addEventListener('click', e => { if (!modelBtn.contains(e.target) && !modelDropdown.contains(e.target)) closeDropdown(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDropdown(); });
     modelSearch.addEventListener('input', () => {
@@ -781,6 +812,47 @@
       });
       resetKeyboardModel();
     }
+
+    function closeHarnessDropdown() {
+      harnessDropdown.classList.remove('open');
+      harnessBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function updateHarnessDisplay(option) {
+      const iconEl = harnessBtn.querySelector('[data-lucide="cpu"]') || harnessIcon;
+      if (iconEl) iconEl.style.color = option.querySelector('.opt-dot').style.background;
+    }
+
+    function selectHarness(option) {
+      selectedHarness = option.dataset.harness;
+      harnessLabel.textContent = option.querySelector('.opt-name').textContent;
+      updateHarnessDisplay(option);
+      harnessDropdown.querySelectorAll('.model-option').forEach(item => {
+        item.classList.toggle('selected', item === option);
+      });
+      closeHarnessDropdown();
+      focusChatInput();
+    }
+
+    harnessBtn.addEventListener('click', () => {
+      closeDropdown();
+      const willOpen = !harnessDropdown.classList.contains('open');
+      harnessDropdown.classList.toggle('open', willOpen);
+      harnessBtn.setAttribute('aria-expanded', String(willOpen));
+    });
+    harnessDropdown.querySelectorAll('.model-option').forEach(option => {
+      option.addEventListener('click', () => selectHarness(option));
+      option.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectHarness(option);
+        }
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!harnessBtn.contains(e.target) && !harnessDropdown.contains(e.target)) closeHarnessDropdown();
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeHarnessDropdown(); });
 
     // Entrada e imagenes
     chatInput.addEventListener('input', () => {
@@ -946,7 +1018,8 @@
         messages: msgs.map(({ role, content }) => ({ role, content })),
         images,
         provider,
-        model
+        model,
+        harness: selectedHarness
       };
 
       const res = await fetch('/api/chat', {
@@ -1193,7 +1266,7 @@
 
       if (/^[0-9]$/.test(e.key) && !e.ctrlKey && !e.shiftKey && !e.altKey && !e.metaKey
           && messages.length === 0 && !chatInput.value && !drawer.classList.contains('open')
-          && !modelDropdown.classList.contains('open')) {
+          && !modelDropdown.classList.contains('open') && !harnessDropdown.classList.contains('open')) {
         const chipIndex = e.key === '0' ? 9 : Number(e.key) - 1;
         const chip = promptTree.querySelectorAll('.hint-chip')[chipIndex];
         if (chip) {
@@ -1242,6 +1315,15 @@
         return;
       }
 
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const nextHarness = selectedHarness === 'kata' ? 'normal' : 'kata';
+        const option = harnessDropdown.querySelector(`[data-harness="${nextHarness}"]`);
+        selectHarness(option);
+        showToast(`Modo ${harnessLabel.textContent}`);
+        return;
+      }
+
       if (!drawer.classList.contains('open') || isConversationSearch || isEditingTitle || (e.key === 'Enter' && isConversationAction)) return;
 
       if (e.key === 'ArrowDown') {
@@ -1276,6 +1358,7 @@
     if (window.lucide) {
       lucide.createIcons();
       updateModelDisplay();
+      updateHarnessDisplay(harnessDropdown.querySelector('.model-option.selected'));
     }
 
     loadPromptTree();
