@@ -1,0 +1,31 @@
+[
+  {
+    "title": "Métodos de array",
+    "items": [
+      {
+        "label": "Carrito de compras",
+        "prompt": "Enséñame por capas, solo en consola JavaScript y sin React, a analizar un carrito de compras. Cada producto debe tener id, nombre, categoría, precio, cantidad, activo y etiquetas. Quiero una respuesta completa. Crea datos de ejemplo y explica qué devuelve filter, map, reduce, find, some, every e includes. Resuelve cada operación por separado con código ejecutable, console.log y salida esperada: filtra productos activos, calcula subtotales con map, calcula el total con reduce, busca un producto con find, detecta descuentos con some, valida stock con every y filtra por categoría con includes. Después muestra una versión encadenada de filter, map y reduce. Explica el flujo, el acumulador y los casos borde. No uses React, Vite ni APIs."
+      },
+      {
+        "label": "Lista de calificaciones",
+        "prompt": "Enséñame con una explicación completa de consola JavaScript a analizar calificaciones de estudiantes. Cada estudiante tiene id, nombre, materias, calificaciones, asistencia y activo. Crea datos variados y después usa filter, map y reduce para obtener estudiantes activos, promedios y promedio general. Incluye find para buscar un estudiante, includes para saber si cursa una materia, some para detectar reprobados y every para comprobar asistencia mínima. Para cada bloque incluye código, console.log y salida esperada. Después escribe una versión encadenada de filter, map y reduce. Explica qué devuelve cada método, el acumulador de reduce, el orden de la cadena y cómo manejar listas vacías o estudiantes sin calificaciones. No uses React ni Vite."
+      },
+      {
+        "label": "Gastos mensuales",
+        "prompt": "Enséñame paso a paso en consola JavaScript cómo analizar gastos mensuales. Cada gasto tiene id, descripción, categoría, monto, pagado, etiquetas y fecha. Crea datos realistas y resuelve el problema completo: usa filter para gastos pagados o de una categoría, map para crear un resumen legible y reduce para calcular totales por categoría y total general. Usa includes para etiquetas, find para buscar un gasto, some para detectar gastos altos y every para validar que todos tengan fecha. Quiero código ejecutable, console.log y resultado esperado después de cada paso. Muestra variables separadas y luego una cadena clara de filter, map y reduce. Explica el acumulador y cómo evitar mutar el array original. No uses React ni Vite."
+      },
+      {
+        "label": "Pedidos de una cafetería",
+        "prompt": "Enséñame una resolución completa en consola JavaScript sobre pedidos de una cafetería. Cada pedido incluye id, cliente, productos, total, entregado, método de pago y etiquetas. Crea datos con pedidos vacíos, totales cero y pedidos pendientes. Filtra pedidos válidos, usa map para crear resúmenes, reduce para obtener ventas por método de pago, find para localizar un pedido, includes para buscar productos, some para detectar pedidos pendientes y every para validar que los entregados tengan pago. Imprime cada resultado con console.log y salida esperada. Convierte la parte filter-map-reduce en una cadena explicada línea por línea. Explica cuándo separar variables y cuándo encadenar, el acumulador y los arrays vacíos. No uses React ni Vite."
+      },
+      {
+        "label": "Lista de tareas del equipo",
+        "prompt": "Enséñame en profundidad, con código de consola JavaScript, a analizar una lista de tareas de un equipo. Cada tarea tiene id, título, responsable, etiquetas, prioridad, completada y horas. Crea datos comunes con campos incompletos. Después construye una solución completa: includes para etiquetas, filter para tareas pendientes, map para diagnósticos legibles, reduce para horas por responsable, find para localizar una tarea y some/every para decisiones globales. Presenta datos, pasos separados, console.log y salidas esperadas antes de mostrar una cadena filter-map-reduce. Explica el flujo completo, los valores intermedios, el acumulador, las decisiones booleanas y cómo conservar el array original sin mutarlo. No incluyas React ni Vite."
+      },
+      {
+        "label": "Inventario de una tienda",
+        "prompt": "Enséñame una guía completa de consola JavaScript para analizar el inventario de una tienda. Cada producto tiene id, nombre, categoría, precio, stock, activo y etiquetas. Crea datos de ejemplo cotidianos y luego explica con código: filter para seleccionar productos disponibles, map para generar un resumen con valor de inventario, reduce para calcular valor por categoría, find para recuperar un producto, includes para buscar etiquetas y some/every para validar stock. Quiero cada método primero por separado con console.log y salida esperada, seguido de una cadena filter-map-reduce. Explica qué entra y sale de cada callback, por qué se usa el valor inicial de reduce, qué pasa si no hay resultados y cómo evitar mutar los datos. No uses React, Vite ni APIs."
+      }
+    ]
+  }
+]

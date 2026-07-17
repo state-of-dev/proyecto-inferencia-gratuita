@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>xhigh</title>
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+
+  <link id="hljs-dark" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-dark.min.css">
+  <link id="hljs-light" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/atom-one-light.min.css" disabled>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+</head>
+<body>
+  <div class="initial-loading" id="initialLoading" aria-label="Cargando conversación" role="status">
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  </div>
+
+  <div class="app">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" id="drawerBtn" aria-label="Conversaciones" title="Conversaciones (Ctrl+Shift+S)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/>
+          </svg>
+        </button>
+
+        <div class="model-selector-wrap">
+          <button class="model-btn" id="modelBtn" aria-haspopup="listbox" aria-expanded="false"
+            aria-label="Seleccionar modelo" title="Seleccionar modelo (Ctrl+Shift+F)">
+            <i data-lucide="brain" width="16" height="16" id="modelIcon"></i>
+            <span class="model-label" id="modelLabel">Seleccionar modelo</span>
+            <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <div class="model-dropdown" id="modelDropdown" role="listbox">
+            <div class="dropdown-search">
+              <input type="text" id="modelSearch" placeholder="Buscar modelo…" autocomplete="off"
+                aria-label="Buscar modelo">
+            </div>
+            <div class="dropdown-body" id="dropdownBody"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" id="copyConversationBtn" aria-label="Copiar conversación" title="Copiar conversación (Ctrl+Shift+C)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="clearBtn" aria-label="Nueva conversación" title="Nueva conversación (Ctrl+Shift+O)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+        <button class="theme-toggle" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema (Ctrl+Alt+T)">
+          <svg class="theme-toggle-icon moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg class="theme-toggle-icon sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </button>
+        <span class="db-status" id="dbStatus"></span>
+      </div>
+    </header>
+
+    <main class="messages-wrap" id="messagesWrap" role="log" aria-live="polite">
+      <div class="empty-state" id="emptyState">
+        <h2>.js</h2>
+        <div class="empty-hints" id="promptTree">
+          <span class="prompt-loading">Cargando prompts...</span>
+        </div>
+      </div>
+    </main>
+
+    <div class="input-area">
+      <div class="image-attachments" id="imageAttachments">
+        <div class="image-preview" id="imagePreview"></div>
+        <span id="imageCounter"></span>
+      </div>
+      <div class="input-box">
+        <textarea class="chat-input" id="chatInput" rows="1" placeholder="Escribe un mensaje…" aria-label="Mensaje"
+          autocomplete="off" spellcheck="true"></textarea>
+        <button class="send-btn" id="sendBtn" aria-label="Enviar" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span id="charCounter"></span>
+      </div>
+    </div>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <aside class="drawer" id="drawer">
+      <div class="drawer-header">
+        <h2>Conversaciones</h2>
+        <button class="icon-btn" id="closeDrawerBtn" aria-label="Cerrar">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <button class="new-chat-btn" id="newChatBtn" title="Nueva conversación (Ctrl+Shift+O)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Nueva conversación
+      </button>
+      <div class="drawer-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" id="conversationSearch" placeholder="Buscar conversaciones…">
+      </div>
+      <div class="drawer-list" id="conversationList">
+        <div class="drawer-empty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <p>No hay conversaciones</p>
+          <span>Crea una nueva para empezar</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="alert"></div>
+
+  <div class="confirm-overlay" id="deleteConfirmOverlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+      <h2 id="deleteConfirmTitle">Eliminar conversación</h2>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn secondary" id="cancelDeleteBtn" type="button">Cancelar</button>
+        <button class="confirm-btn danger" id="confirmDeleteBtn" type="button">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuracion y estado
+    const STORAGE_KEY = 'inferencia_conversations';
+    let conversations = [];
+    let currentConversationId = null;
+
+    const PROVIDERS = [
+      { id: 'groq', name: 'Groq', color: '#a8b4f0' },
+      { id: 'openrouter', name: 'OpenRouter', color: '#b4a0d4' },
+      { id: 'google', name: 'Google', color: '#8ab4f8' },
+      { id: 'mistral', name: 'Mistral', color: '#ffab91' },
+      { id: 'cohere', name: 'Cohere', color: '#a5d6a7' },
+      { id: 'cerebras', name: 'Cerebras', color: '#ffcc80' },
+    ];
+
+    const MODELS = [
+      { id: 'gpt-oss-120b', label: 'GPT OSS 120B', provider: 'cerebras', tag: 'Cerebras' },
+      { id: 'codestral-latest', label: 'Codestral', provider: 'mistral', tag: 'Mistral' },
+      { id: 'north-mini-code-1-0', label: 'North Mini Code 1.0', provider: 'cohere', tag: 'Cohere' },
+      { id: 'qwen/qwen3.6-27b', label: 'Qwen 3.6 27B', provider: 'groq', tag: 'Groq' },
+      { id: 'gemini-3.5-flash', label: 'Gemini 3.5 Flash', provider: 'google', tag: 'Google' },
+      { id: 'openrouter/free', label: 'Auto Router', provider: 'openrouter', tag: 'OpenRouter' },
+    ];
+
+    const MAX_IMAGES = 5;
+    const PROMPTS_FILE = '/prompts.json';
+
+    let selectedModel = MODELS.find(m => m.id === 'gpt-oss-120b');
+    let messages = [];
+    let attachedImages = [];
+    let isLoading = false;
+    let currentTheme = 'dark';
+    window.dbReady = false;
+
+    const modelBtn = document.getElementById('modelBtn');
+    const modelIcon = document.getElementById('modelIcon');
+    const modelLabel = document.getElementById('modelLabel');
+    const modelDropdown = document.getElementById('modelDropdown');
+    const modelSearch = document.getElementById('modelSearch');
+    const dropdownBody = document.getElementById('dropdownBody');
+    const promptTree = document.getElementById('promptTree');
+    const messagesWrap = document.getElementById('messagesWrap');
+    const emptyState = document.getElementById('emptyState');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const charCounter = document.getElementById('charCounter');
+    const imageCounter = document.getElementById('imageCounter');
+    const imagePreview = document.getElementById('imagePreview');
+    const toastEl = document.getElementById('toast');
+    const initialLoading = document.getElementById('initialLoading');
+    const drawerBtn = document.getElementById('drawerBtn');
+    const drawer = document.getElementById('drawer');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const drawerList = document.getElementById('conversationList');
+    const conversationSearch = document.getElementById('conversationSearch');
+    const newChatBtn = document.getElementById('newChatBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const copyConversationBtn = document.getElementById('copyConversationBtn');
+    const deleteConfirmOverlay = document.getElementById('deleteConfirmOverlay');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    let pendingDeleteId = null;
+    let keyboardConversationIndex = -1;
+    let keyboardConversationAction = null;
+    let keyboardModelIndex = -1;
+    let isKeyboardModelNavigation = false;
+
+    // Base de datos y persistencia local
+    function generateId() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+      } catch (e) {
+        console.warn('LocalStorage error:', e.message);
+      }
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        conversations = stored ? JSON.parse(stored) : [];
+      } catch {
+        conversations = [];
+      }
+      renderConversations();
+      loadConversationFromUrl();
+    }
+
+    async function initDB() {
+      const statusEl = document.getElementById('dbStatus');
+
+      try {
+        const res = await fetch('/api/conversations');
+        const data = await res.json();
+        conversations = data.conversations || [];
+        saveToLocalStorage();
+        renderConversations();
+        loadConversationFromUrl();
+        statusEl.textContent = '●';
+        statusEl.classList.add('connected');
+        window.dbReady = true;
+      } catch {
+        statusEl.textContent = '○';
+        loadFromLocalStorage();
+        window.dbReady = false;
+      }
+
+      initialLoading.classList.add('hidden');
+    }
+
+    async function syncToNeon(conv, action) {
+      if (!window.dbReady) return;
+
+      await fetch('/api/conversations', {
+        method: action === 'delete' ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(conv)
+      }).catch(() => {});
+    }
+
+    // Conversaciones
+    function createConversation() {
+      const newConv = {
+        id: generateId(),
+        title: 'Nueva conversación',
+        messages: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      conversations.unshift(newConv);
+      saveToLocalStorage();
+      syncToNeon(newConv, 'upsert');
+      currentConversationId = newConv.id;
+      setConversationUrl(newConv.id);
+      messages = [];
+      clearMessagesUI();
+      renderConversations();
+    }
+
+    function updateConversation(id, title, msgs) {
+      const idx = conversations.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        const updated = { ...conversations[idx], title, messages: msgs, updated_at: new Date().toISOString() };
+        conversations[idx] = updated;
+        saveToLocalStorage();
+        syncToNeon(updated, 'upsert');
+      }
+    }
+
+    function deleteConversation(id) {
+      const conv = conversations.find(c => c.id === id);
+      if (conv) syncToNeon(conv, 'delete');
+      conversations = conversations.filter(c => c.id !== id);
+      saveToLocalStorage();
+      if (currentConversationId === id) {
+        resetConversationDraft();
+      }
+      renderConversations();
+      showToast('Conversación eliminada');
+    }
+
+    function focusChatInput() {
+      setTimeout(() => chatInput.focus({ preventScroll: true }), 80);
+    }
+
+    function openDeleteDialog(id) {
+      pendingDeleteId = id;
+      deleteConfirmOverlay.classList.add('open');
+      deleteConfirmOverlay.setAttribute('aria-hidden', 'false');
+      setTimeout(() => confirmDeleteBtn.focus(), 60);
+    }
+
+    function closeDeleteDialog() {
+      pendingDeleteId = null;
+      deleteConfirmOverlay.classList.remove('open');
+      deleteConfirmOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function setConversationUrl(id, replace = false) {
+      const url = id ? `/chat/${encodeURIComponent(id)}` : '/';
+      history[replace ? 'replaceState' : 'pushState'](null, '', url);
+    }
+
+    function getConversationIdFromUrl() {
+      const match = window.location.pathname.match(/^\/chat\/([^/]+)$/);
+      if (!match) return null;
+
+      try {
+        return decodeURIComponent(match[1]);
+      } catch {
+        return null;
+      }
+    }
+
+    function loadConversationFromUrl() {
+      const id = getConversationIdFromUrl();
+      if (id && conversations.some(conv => conv.id === id)) {
+        selectConversation(id, false);
+        return;
+      }
+
+      resetConversationDraft(false);
+      if (id) setConversationUrl(null, true);
+    }
+
+    function selectConversation(id, updateUrl = true) {
+      const conv = conversations.find(c => c.id === id);
+      if (!conv) return;
+      currentConversationId = id;
+      if (updateUrl) setConversationUrl(id);
+      messages = conv.messages || [];
+      renderMessages();
+      renderConversations(conversationSearch.value.trim());
+      closeDrawer();
+      focusChatInput();
+    }
+
+    function renderConversations(filter = '') {
+      const filtered = conversations.filter(c => 
+        c.title.toLowerCase().includes(filter.toLowerCase())
+      );
+      
+      if (filtered.length === 0) {
+        drawerList.innerHTML = `
+          <div class="drawer-empty">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <p>${filter ? 'No hay resultados' : 'No hay conversaciones'}</p>
+            <span>${filter ? 'Prueba con otro término' : 'Crea una nueva para empezar'}</span>
+          </div>
+        `;
+        return;
+      }
+
+      if (keyboardConversationIndex >= filtered.length) keyboardConversationIndex = -1;
+
+      drawerList.innerHTML = filtered.map((conv, index) => {
+        const isActive = conv.id === currentConversationId;
+        const date = new Date(conv.updated_at).toLocaleDateString('es', {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        const msgCount = (conv.messages || []).length;
+        
+        return `
+          <div class="conversation-item ${isActive ? 'active' : ''} ${index === keyboardConversationIndex ? 'keyboard-selected' : ''}" data-id="${conv.id}">
+            <div class="conversation-content" tabindex="-1">
+              <div class="conversation-title">${conv.title}</div>
+              <div class="conversation-meta">
+                <span>${date}</span>
+                <span class="msg-count">${msgCount} mensajes</span>
+              </div>
+            </div>
+            <div class="conversation-actions">
+              <button class="conv-action-btn edit" data-id="${conv.id}" title="Editar" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9-9z"/>
+                </svg>
+              </button>
+              <button class="conv-action-btn delete" data-id="${conv.id}" title="Eliminar" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      drawerList.querySelectorAll('.conversation-content').forEach(content => {
+        content.addEventListener('click', () => {
+          if (content.querySelector('.conversation-title.editing')) return;
+          selectConversation(content.closest('.conversation-item').dataset.id);
+        });
+      });
+
+      drawerList.querySelectorAll('.conv-action-btn.edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          keyboardConversationAction = null;
+          const id = btn.dataset.id;
+          const conv = conversations.find(c => c.id === id);
+          if (!conv) return;
+          const titleEl = drawerList.querySelector(`.conversation-item[data-id="${id}"] .conversation-title`);
+          titleEl.contentEditable = true;
+          titleEl.focus();
+          titleEl.classList.add('editing');
+          titleEl.dataset.editId = id;
+        });
+      });
+
+      drawerList.querySelectorAll('.conv-action-btn.delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openDeleteDialog(btn.dataset.id);
+        });
+      });
+    }
+
+    drawerList.addEventListener('blur', (e) => {
+      if (e.target.classList.contains('conversation-title') && e.target.contentEditable === 'true') {
+        const titleEl = e.target;
+        titleEl.contentEditable = false;
+        titleEl.classList.remove('editing');
+        const id = titleEl.dataset.editId;
+        const conv = conversations.find(c => c.id === id);
+        if (!conv) return;
+        const newTitle = titleEl.textContent.trim();
+        if (newTitle && newTitle !== conv.title) {
+          updateConversation(id, newTitle, conv.messages);
+          renderConversations(conversationSearch.value.trim());
+        } else {
+          titleEl.textContent = conv.title;
+        }
+      }
+    }, true);
+
+    drawerList.addEventListener('keydown', (e) => {
+      if (e.target.classList.contains('conversation-title') && e.target.contentEditable === 'true') {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          e.target.blur();
+        }
+        if (e.key === 'Escape') {
+          const id = e.target.dataset.editId;
+          const conv = conversations.find(c => c.id === id);
+          e.target.textContent = conv?.title || '';
+          e.target.blur();
+        }
+      }
+    }, true);
+
+    // Panel de conversaciones
+    function toggleDrawer() {
+      const willOpen = !drawer.classList.contains('open');
+      drawer.classList.toggle('open', willOpen);
+      drawerOverlay.classList.toggle('open', willOpen);
+      if (willOpen) {
+        const filter = conversationSearch.value.trim().toLowerCase();
+        const visibleConversations = conversations.filter(conv =>
+          conv.title.toLowerCase().includes(filter)
+        );
+        const currentIndex = visibleConversations.findIndex(conv => conv.id === currentConversationId);
+        keyboardConversationIndex = currentIndex >= 0 ? currentIndex : (visibleConversations.length > 0 ? 0 : -1);
+        renderConversations(filter);
+      } else {
+        keyboardConversationIndex = -1;
+        keyboardConversationAction = null;
+      }
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove('open');
+      drawerOverlay.classList.remove('open');
+      keyboardConversationIndex = -1;
+      keyboardConversationAction = null;
+    }
+
+    function startNewConversation() {
+      if (currentConversationId && messages.length > 0) {
+        const conv = conversations.find(c => c.id === currentConversationId);
+        updateConversation(currentConversationId, conv?.title || 'Nueva conversación', messages);
+      }
+      resetConversationDraft();
+    }
+
+    function navigateConversations(direction) {
+      const items = [...drawerList.querySelectorAll('.conversation-item')];
+      if (items.length === 0) return;
+
+      keyboardConversationIndex = direction > 0
+        ? Math.min(keyboardConversationIndex + 1, items.length - 1)
+        : Math.max(keyboardConversationIndex - 1, 0);
+      keyboardConversationAction = null;
+      renderConversations(conversationSearch.value.trim());
+      drawerList.querySelectorAll('.conversation-item')[keyboardConversationIndex]
+        ?.scrollIntoView({ block: 'nearest' });
+    }
+
+    function focusConversationAction(action) {
+      const item = drawerList.querySelectorAll('.conversation-item')[keyboardConversationIndex];
+      const button = item?.querySelector(`.conv-action-btn.${action}`);
+      if (!button) return;
+      keyboardConversationAction = action;
+      button.focus();
+    }
+
+    function focusKeyboardConversation() {
+      const item = drawerList.querySelectorAll('.conversation-item')[keyboardConversationIndex];
+      keyboardConversationAction = null;
+      item?.querySelector('.conversation-content')?.focus();
+    }
+
+    // Mensajes y Markdown
+    function clearMessagesUI() {
+      messagesWrap.innerHTML = '';
+      messagesWrap.appendChild(emptyState);
+      emptyState.style.display = '';
+    }
+
+    function resetConversationDraft(updateUrl = true) {
+      messages = [];
+      currentConversationId = null;
+      if (updateUrl) setConversationUrl(null);
+      messagesWrap.innerHTML = '';
+      messagesWrap.appendChild(emptyState);
+      emptyState.style.display = '';
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      attachedImages = [];
+      renderImagePreview();
+      updateSendBtn();
+      focusChatInput();
+    }
+
+    function renderMessages() {
+      clearMessagesUI();
+      if (messages.length === 0) {
+        return;
+      }
+      emptyState.style.display = 'none';
+      messages.forEach(msg => {
+        const displayContent = msg.role === 'user' && msg.imageCount
+          ? `${msg.content}\n\n[${msg.imageCount} imagen${msg.imageCount > 1 ? 'es' : ''} adjunta${msg.imageCount > 1 ? 's' : ''}]`
+          : msg.content;
+        appendMessage(msg.role, displayContent, msg.model);
+      });
+    }
+
+    marked.use({
+      breaks: true,
+      gfm: true,
+      renderer: (() => {
+        const r = new marked.Renderer();
+        r.code = (code, lang) => {
+          const validLang = lang && hljs.getLanguage(lang) ? lang : null;
+          const highlighted = validLang
+            ? hljs.highlight(code, { language: validLang }).value
+            : hljs.highlightAuto(code).value;
+          const detectedLang = validLang || 'auto';
+          return `<div class="code-block-wrap">
+        <div class="code-block-header">
+          <span class="code-lang">${detectedLang}</span>
+          <button class="code-copy-btn" onclick="copyCode(this)" aria-label="Copiar código">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar
+          </button>
+        </div>
+        <pre><code class="hljs language-${detectedLang}">${highlighted}</code></pre>
+      </div>`;
+        };
+        return r;
+      })()
+    });
+
+    function copyCode(btn) {
+      const code = btn.closest('.code-block-wrap').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Copiado`;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar`;
+        }, 2000);
+      });
+    }
+
+    // Selector de modelos
+    function updateModelDisplay() {
+      const p = PROVIDERS.find(pp => pp.id === selectedModel.provider);
+      const iconEl = modelBtn.querySelector('[data-lucide="brain"]') || modelIcon;
+      if (iconEl && p) iconEl.style.color = p.color;
+      modelLabel.textContent = p
+        ? `${p.name} · ${selectedModel.label}`
+        : selectedModel.label;
+    }
+
+    function updateModelSearchMode() {
+      const isOpenRouter = selectedModel.provider === 'openrouter';
+      modelSearch.placeholder = isOpenRouter ? 'ID de modelo OpenRouter...' : 'Buscar modelo...';
+    }
+
+    function buildDropdown() {
+      dropdownBody.innerHTML = '';
+      MODELS.forEach(m => {
+        const p = PROVIDERS.find(pp => pp.id === m.provider);
+        const opt = document.createElement('div');
+        opt.className = 'model-option' + (selectedModel?.id === m.id ? ' selected' : '');
+        opt.dataset.provider = m.provider;
+        opt.dataset.model = m.id;
+        opt.dataset.label = m.label.toLowerCase();
+        opt.setAttribute('role', 'option');
+        opt.tabIndex = 0;
+        opt.innerHTML = `<span class="opt-dot" style="background:${p.color}"></span><span class="opt-name">${m.label}</span><span class="opt-tag">${m.tag}</span>`;
+        opt.addEventListener('click', (event) => {
+          event.stopPropagation();
+          selectModel(m);
+        });
+        opt.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectModel(m); } });
+        dropdownBody.appendChild(opt);
+      });
+    }
+
+    function visibleModelOptions() {
+      return [...dropdownBody.querySelectorAll('.model-option:not(.hidden)')];
+    }
+
+    function highlightKeyboardModel() {
+      const options = visibleModelOptions();
+      dropdownBody.querySelectorAll('.model-option.focused').forEach(opt => opt.classList.remove('focused'));
+      if (options.length === 0) {
+        keyboardModelIndex = -1;
+        return;
+      }
+
+      keyboardModelIndex = Math.max(0, Math.min(keyboardModelIndex, options.length - 1));
+      const option = options[keyboardModelIndex];
+      option.classList.add('focused');
+      option.scrollIntoView({ block: 'nearest' });
+    }
+
+    function resetKeyboardModel() {
+      const options = visibleModelOptions();
+      isKeyboardModelNavigation = false;
+      keyboardModelIndex = options.findIndex(opt =>
+        opt.dataset.provider === selectedModel.provider && opt.dataset.model === selectedModel.id
+      );
+      if (keyboardModelIndex < 0 && options.length > 0) keyboardModelIndex = 0;
+      highlightKeyboardModel();
+    }
+
+    function navigateModels(direction) {
+      const options = visibleModelOptions();
+      if (options.length === 0) return;
+      isKeyboardModelNavigation = true;
+      keyboardModelIndex = Math.max(0, Math.min(keyboardModelIndex + direction, options.length - 1));
+      highlightKeyboardModel();
+    }
+
+    function selectModel(m) {
+      selectedModel = m;
+      updateModelDisplay();
+      buildDropdown();
+      closeDropdown();
+      updateSendBtn();
+    }
+
+    function openDropdown() {
+      modelDropdown.classList.add('open');
+      modelBtn.setAttribute('aria-expanded', 'true');
+      if (selectedModel.provider === 'openrouter') {
+        modelSearch.value = selectedModel.id;
+        updateModelSearchMode();
+      } else {
+        modelSearch.value = '';
+        updateModelSearchMode();
+        filterModels('');
+      }
+      resetKeyboardModel();
+      setTimeout(() => {
+        modelSearch.focus();
+        if (selectedModel.provider === 'openrouter') modelSearch.select();
+      }, 60);
+    }
+    function closeDropdown() {
+      modelDropdown.classList.remove('open');
+      modelBtn.setAttribute('aria-expanded', 'false');
+      keyboardModelIndex = -1;
+      isKeyboardModelNavigation = false;
+    }
+
+    modelBtn.addEventListener('click', () => modelDropdown.classList.contains('open') ? closeDropdown() : openDropdown());
+    document.addEventListener('click', e => { if (!modelBtn.contains(e.target) && !modelDropdown.contains(e.target)) closeDropdown(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDropdown(); });
+    modelSearch.addEventListener('input', () => {
+      if (selectedModel.provider !== 'openrouter') {
+        filterModels(modelSearch.value.trim().toLowerCase());
+        return;
+      }
+
+      const id = modelSearch.value.trim();
+      selectedModel = id
+        ? { id, label: id, provider: 'openrouter', tag: 'OpenRouter' }
+        : MODELS.find(m => m.id === 'openrouter/free');
+      updateModelDisplay();
+      buildDropdown();
+      resetKeyboardModel();
+      updateSendBtn();
+    });
+    modelSearch.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        navigateModels(1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        navigateModels(-1);
+      } else if (e.key === 'Enter') {
+        const option = visibleModelOptions()[keyboardModelIndex];
+        if (option && (selectedModel.provider !== 'openrouter' || isKeyboardModelNavigation)) {
+          e.preventDefault();
+          selectModel(MODELS.find(m => m.provider === option.dataset.provider && m.id === option.dataset.model));
+        } else if (selectedModel.provider === 'openrouter') {
+          closeDropdown();
+        }
+      }
+    });
+
+    function filterModels(q) {
+      dropdownBody.querySelectorAll('.model-option').forEach(opt => {
+        const match = !q || opt.dataset.label.includes(q) || opt.dataset.provider.includes(q);
+        opt.classList.toggle('hidden', !match);
+      });
+      resetKeyboardModel();
+    }
+
+    // Entrada e imagenes
+    chatInput.addEventListener('input', () => {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 200) + 'px';
+      const l = chatInput.value.length;
+      charCounter.textContent = l > 60 ? `${l}` : '';
+      updateSendBtn();
+    });
+    chatInput.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        const lastUserMessage = [...messages].reverse().find(message => message.role === 'user');
+        if (lastUserMessage) {
+          e.preventDefault();
+          chatInput.value = lastUserMessage.content;
+          chatInput.dispatchEvent(new Event('input'));
+          chatInput.setSelectionRange(chatInput.value.length, chatInput.value.length);
+        }
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+    chatInput.addEventListener('paste', async e => {
+      const files = [...(e.clipboardData?.files || [])].filter(file => file.type.startsWith('image/'));
+      if (files.length) await addImageFiles(files);
+    });
+    function updateSendBtn() {
+      sendBtn.disabled = isLoading || (!chatInput.value.trim() && attachedImages.length === 0) || !selectedModel;
+    }
+
+    async function addImageFiles(files) {
+      const availableSlots = MAX_IMAGES - attachedImages.length;
+      const images = await Promise.all(files.slice(0, availableSlots).map(fileToDataUrl));
+      attachedImages = [...attachedImages, ...images];
+      if (files.length > availableSlots) showToast(`Máximo ${MAX_IMAGES} imágenes por envío`);
+      renderImagePreview();
+      updateSendBtn();
+    }
+
+    function renderImagePreview() {
+      imageCounter.textContent = attachedImages.length ? `${attachedImages.length} imagen${attachedImages.length > 1 ? 'es' : ''}` : '';
+      imagePreview.innerHTML = attachedImages.map((image, index) => `
+        <button class="image-preview-item" type="button" data-index="${index}" title="Quitar imagen">
+          <img src="${image}" alt="Imagen adjunta ${index + 1}">
+        </button>
+      `).join('');
+    }
+
+    imagePreview.addEventListener('click', e => {
+      const item = e.target.closest('.image-preview-item');
+      if (!item) return;
+      attachedImages.splice(Number(item.dataset.index), 1);
+      renderImagePreview();
+      updateSendBtn();
+    });
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Prompts rapidos
+    async function loadPromptTree() {
+      try {
+        const res = await fetch(PROMPTS_FILE);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        renderPromptTree(await res.json());
+      } catch (err) {
+        promptTree.innerHTML = `<span class="prompt-loading">No se pudieron cargar los prompts: ${err.message}</span>`;
+      }
+    }
+
+    function renderPromptTree(categories) {
+      promptTree.innerHTML = categories[0].items.map(item => `
+        <button class="hint-chip" type="button" data-prompt="${escapeHtml(item.prompt)}">
+          ${escapeHtml(item.label)}
+        </button>
+      `).join('');
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    promptTree.addEventListener('click', e => {
+      const chip = e.target.closest('.hint-chip');
+      if (!chip) return;
+      chatInput.value = chip.dataset.prompt;
+      chatInput.dispatchEvent(new Event('input'));
+      chatInput.focus();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', startNewConversation);
+
+    // Chat
+    sendBtn.addEventListener('click', handleSend);
+
+    async function handleSend() {
+      const text = chatInput.value.trim();
+      const images = attachedImages;
+      if ((!text && images.length === 0) || isLoading || !selectedModel) return;
+
+      if (!currentConversationId) {
+        createConversation();
+      }
+
+      emptyState.style.display = 'none';
+      const userText = text || '[Imagen adjunta]';
+      messages.push({ role: 'user', content: userText, imageCount: images.length });
+      appendMessage('user', images.length ? `${userText}\n\n[${images.length} imagen${images.length > 1 ? 'es' : ''} adjunta${images.length > 1 ? 's' : ''}]` : userText);
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+      attachedImages = [];
+      renderImagePreview();
+      charCounter.textContent = '';
+      isLoading = true;
+      updateSendBtn();
+
+      const typing = appendTyping();
+      try {
+        const messageModel = selectedModel;
+        const result = await callProvider(selectedModel.provider, selectedModel.id, messages, images);
+        const reply = result.content;
+        typing.remove();
+        messages.push({ role: 'assistant', content: reply, model: messageModel });
+        appendMessage('assistant', reply, messageModel);
+        
+        const conv = conversations.find(c => c.id === currentConversationId);
+        if (conv) {
+          const title = messages[0]?.content?.substring(0, 50) || 'Nueva conversación';
+          conv.title = title + (title.length >= 50 ? '…' : '');
+          updateConversation(currentConversationId, conv.title, messages);
+          renderConversations(conversationSearch.value.trim());
+        }
+      } catch (err) {
+        typing.remove();
+        showToast(` ${err.message}`);
+        messages.pop();
+        appendMessage('assistant', `**Error:** ${err.message}`, selectedModel);
+      } finally {
+        isLoading = false;
+        updateSendBtn();
+      }
+    }
+
+    async function callProvider(provider, model, msgs, images) {
+      const payload = {
+        messages: msgs.map(({ role, content }) => ({ role, content })),
+        images,
+        provider,
+        model
+      };
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const raw = await res.text();
+      const data = raw ? JSON.parse(raw) : {};
+      if (!res.ok) throw new Error(data?.error?.message || data?.error || data?.message || `HTTP ${res.status}`);
+      return data;
+    }
+
+    // Renderizado de respuestas
+    function appendMessage(role, content, model) {
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+      if (role === 'assistant' && model) {
+        const p = PROVIDERS.find(pp => pp.id === model.provider);
+        meta.innerHTML = p
+          ? `<span style="color:${p.color}">●</span> ${p.name} · ${model.label}`
+          : `Asistente · ${model.label || model.id || 'Modelo'}`;
+      } else if (role === 'assistant') {
+        meta.textContent = 'Asistente';
+      } else {
+        meta.textContent = 'Tú';
+      }
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'msg-copy-btn';
+      copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+      copyBtn.onclick = () => copyMessage(copyBtn, content);
+      copyBtn.title = 'Copiar';
+      meta.appendChild(copyBtn);
+      const bubble = document.createElement('div');
+      bubble.className = role === 'assistant' ? 'msg-content' : 'msg-bubble';
+      if (role === 'assistant') {
+        const md = document.createElement('div');
+        md.className = 'md-content';
+        md.innerHTML = marked.parse(formatThinkingBlocks(content));
+        bubble.appendChild(md);
+
+        const topBtn = document.createElement('button');
+        topBtn.className = 'response-top-btn';
+        topBtn.type = 'button';
+        topBtn.title = 'Ir al inicio de esta respuesta';
+        topBtn.setAttribute('aria-label', 'Ir al inicio de esta respuesta');
+        topBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
+        topBtn.onclick = () => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        bubble.appendChild(topBtn);
+      } else {
+        bubble.textContent = content;
+      }
+      wrap.appendChild(meta);
+      wrap.appendChild(bubble);
+      messagesWrap.appendChild(wrap);
+      messagesWrap.scrollTop = messagesWrap.scrollHeight;
+    }
+
+    function formatThinkingBlocks(content) {
+      const text = decodeMaybeJsonString(content);
+      return text.replace(/<think>([\s\S]*?)<\/think>/gi, (_, think) => {
+        const safeThink = think.trim().replace(/<\/summary>/gi, '<\\/summary>');
+        return `<details class="think-details"><summary>Inferencia extendida</summary>\n\n${safeThink}\n\n</details>`;
+      });
+    }
+
+    function decodeMaybeJsonString(content) {
+      const text = String(content || '').trim();
+      if (!text.startsWith('"') || !text.endsWith('"')) return text;
+
+      try {
+        const parsed = JSON.parse(text);
+        return typeof parsed === 'string' ? parsed : text;
+      } catch {
+        return text;
+      }
+    }
+
+    function copyMessage(btn, content) {
+      navigator.clipboard.writeText(content).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`;
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+        }, 2000);
+      });
+    }
+
+    function formatConversationForCopy() {
+      return messages.map(msg => {
+        const author = msg.role === 'user' ? 'Tú' : 'Asistente';
+        const model = msg.role === 'assistant' && msg.model?.label ? ` (${msg.model.label})` : '';
+        const imageNote = msg.role === 'user' && msg.imageCount
+          ? `\n[${msg.imageCount} imagen${msg.imageCount > 1 ? 'es' : ''} adjunta${msg.imageCount > 1 ? 's' : ''}]`
+          : '';
+        return `${author}${model}:\n${msg.content}${imageNote}`;
+      }).join('\n\n---\n\n');
+    }
+
+    function copyConversation(btn) {
+      if (!messages.length) {
+        showToast('No hay conversación para copiar');
+        return;
+      }
+
+      navigator.clipboard.writeText(formatConversationForCopy()).then(() => {
+        const original = btn.innerHTML;
+        btn.classList.add('active');
+        btn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`;
+        showToast('Conversación copiada');
+        setTimeout(() => {
+          btn.classList.remove('active');
+          btn.innerHTML = original;
+        }, 2000);
+      });
+    }
+
+    function appendTyping() {
+      const wrap = document.createElement('div');
+      wrap.className = 'msg assistant';
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+      if (selectedModel) {
+        const p = PROVIDERS.find(pp => pp.id === selectedModel.provider);
+        meta.innerHTML = `<span style="color:${p.color}">●</span> ${p.name} · ${selectedModel.label}`;
+      }
+      const ind = document.createElement('div');
+      ind.className = 'typing-indicator';
+      ind.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      wrap.appendChild(meta);
+      wrap.appendChild(ind);
+      messagesWrap.appendChild(wrap);
+      messagesWrap.scrollTop = messagesWrap.scrollHeight;
+      return wrap;
+    }
+
+    // Tema
+    const themeBtn = document.getElementById('themeBtn');
+    const hljsDark = document.getElementById('hljs-dark');
+    const hljsLight = document.getElementById('hljs-light');
+
+    themeBtn.addEventListener('click', () => {
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      const applyTheme = () => {
+        currentTheme = nextTheme;
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        hljsDark.disabled = currentTheme !== 'dark';
+        hljsLight.disabled = currentTheme !== 'light';
+      };
+
+      if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        applyTheme();
+        return;
+      }
+
+      const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const { top, left, width, height } = themeBtn.getBoundingClientRect();
+      const x = left + width / 2;
+      const y = top + height / 2;
+      const maxRadius = Math.hypot(
+        Math.max(x, viewportWidth - x),
+        Math.max(y, viewportHeight - y)
+      );
+      const clipPath = getThemeClipPaths(x, y, maxRadius);
+      const root = document.documentElement;
+
+      root.dataset.themeVt = 'active';
+      root.style.setProperty('--theme-vt-duration', '500ms');
+      root.style.setProperty('--theme-vt-clip-from', clipPath[0]);
+
+      const transition = document.startViewTransition(applyTheme);
+      transition.finished.finally(() => {
+        delete root.dataset.themeVt;
+        root.style.removeProperty('--theme-vt-duration');
+        root.style.removeProperty('--theme-vt-clip-from');
+      });
+
+      transition.ready.then(() => {
+        document.documentElement.animate({
+          clipPath
+        }, {
+          duration: 500,
+          easing: 'ease-in-out',
+          fill: 'forwards',
+          pseudoElement: '::view-transition-new(root)'
+        });
+      });
+
+    });
+
+    function getThemeClipPaths(cx, cy, maxRadius) {
+      return [
+        `circle(0px at ${cx}px ${cy}px)`,
+        `circle(${maxRadius}px at ${cx}px ${cy}px)`
+      ];
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5000);
+    }
+
+    // Eventos globales e inicio
+    drawerBtn.addEventListener('click', toggleDrawer);
+    drawerOverlay.addEventListener('click', closeDrawer);
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    copyConversationBtn.addEventListener('click', () => copyConversation(copyConversationBtn));
+    cancelDeleteBtn.addEventListener('click', closeDeleteDialog);
+    deleteConfirmOverlay.addEventListener('click', (e) => {
+      if (e.target === deleteConfirmOverlay) closeDeleteDialog();
+    });
+    confirmDeleteBtn.addEventListener('click', () => {
+      if (!pendingDeleteId) return;
+      const id = pendingDeleteId;
+      deleteConfirmOverlay.classList.remove('open');
+      deleteConfirmOverlay.setAttribute('aria-hidden', 'true');
+      pendingDeleteId = null;
+      deleteConversation(id);
+      setTimeout(focusKeyboardConversation, 0);
+    });
+    newChatBtn.addEventListener('click', () => {
+      startNewConversation();
+      closeDrawer();
+    });
+    conversationSearch.addEventListener('input', () => renderConversations(conversationSearch.value.trim()));
+    document.addEventListener('keydown', (e) => {
+      if (deleteConfirmOverlay.classList.contains('open')) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          confirmDeleteBtn.click();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeDeleteDialog();
+        }
+        return;
+      }
+
+      const isConversationSearch = e.target === conversationSearch;
+      const isEditingTitle = e.target.matches('[contenteditable="true"]');
+      const isConversationAction = e.target.classList.contains('conv-action-btn');
+
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault();
+        startNewConversation();
+        closeDrawer();
+        return;
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        toggleDrawer();
+        return;
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        if (modelDropdown.classList.contains('open')) {
+          closeDropdown();
+        } else {
+          openDropdown();
+        }
+        return;
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        copyConversation(copyConversationBtn);
+        return;
+      }
+
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        themeBtn.click();
+        return;
+      }
+
+      if (!drawer.classList.contains('open') || isConversationSearch || isEditingTitle || (e.key === 'Enter' && isConversationAction)) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        navigateConversations(1);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        navigateConversations(-1);
+      } else if (e.key === 'ArrowRight' && keyboardConversationIndex >= 0) {
+        e.preventDefault();
+        focusConversationAction('delete');
+      } else if (e.key === 'ArrowLeft' && keyboardConversationAction === 'delete') {
+        e.preventDefault();
+        focusConversationAction('edit');
+      } else if (e.key === 'ArrowLeft' && keyboardConversationAction === 'edit') {
+        e.preventDefault();
+        focusKeyboardConversation();
+      } else if (e.key === 'Enter' && keyboardConversationIndex >= 0) {
+        const item = drawerList.querySelectorAll('.conversation-item')[keyboardConversationIndex];
+        if (item) selectConversation(item.dataset.id);
+      } else if (e.key === 'Escape') {
+        closeDrawer();
+      }
+    });
+    window.addEventListener('popstate', loadConversationFromUrl);
+
+    updateModelDisplay();
+    buildDropdown();
+    updateSendBtn();
+    focusChatInput();
+    
+    if (window.lucide) {
+      lucide.createIcons();
+      updateModelDisplay();
+    }
+
+    loadPromptTree();
+    initDB();
+  </script>
+</body>
+
+</html>
