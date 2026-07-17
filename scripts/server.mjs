@@ -41,7 +41,7 @@ if (isMainModule()) {
 
 // Chat
 export async function handleChat(req, res) {
-  const { provider, model, harness = 'normal', messages = [], images = [] } = await readJson(req);
+  const { provider, model, harness = 'kata', messages = [], images = [] } = await readJson(req);
   const cleanMessages = messages.map(({ role, content }) => ({ role, content }));
   const imageContext = images.length ? await describeImages(cleanMessages, images.slice(0, MAX_IMAGES)) : '';
 

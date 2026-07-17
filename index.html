@@ -64,7 +64,7 @@
           <button class="model-btn" id="harnessBtn" aria-haspopup="listbox" aria-expanded="false"
             aria-label="Seleccionar modo" title="Modo del asistente (Ctrl+Alt+K)">
             <i data-lucide="cpu" width="16" height="16" id="harnessIcon"></i>
-            <span class="model-label" id="harnessLabel">Normal</span>
+            <span class="model-label" id="harnessLabel">Kata</span>
             <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2.5">
               <path d="M6 9l6 6 6-6" />
@@ -72,10 +72,10 @@
           </button>
           <div class="model-dropdown harness-dropdown" id="harnessDropdown" role="listbox">
             <div class="dropdown-body">
-              <div class="model-option selected" data-harness="normal" role="option" tabindex="0">
+              <div class="model-option" data-harness="normal" role="option" tabindex="0">
                 <span class="opt-dot" style="background:#94a3b8"></span><span class="opt-name">Normal</span><span class="opt-tag">Sin arnés</span>
               </div>
-              <div class="model-option" data-harness="kata" role="option" tabindex="0">
+              <div class="model-option selected" data-harness="kata" role="option" tabindex="0">
                 <span class="opt-dot" style="background:#a5d6a7"></span><span class="opt-name">Kata</span><span class="opt-tag">Practicar</span>
               </div>
             </div>
@@ -253,7 +253,7 @@
     let keyboardConversationAction = null;
     let keyboardModelIndex = -1;
     let isKeyboardModelNavigation = false;
-    let selectedHarness = 'normal';
+    let selectedHarness = 'kata';
 
     // Base de datos y persistencia local
     function generateId() {
